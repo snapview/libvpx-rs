@@ -7,6 +7,7 @@ extern crate libc;
 
 pub mod encoder;
 
+
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 pub enum Error {
     Generic(u32),
@@ -22,8 +23,9 @@ pub enum Error {
     InvalidParam,
     ListEnd,
 }
-impl From<u32> for Error {
-    fn from(v: u32) -> Error {
+use ffi::_bindgen_ty_3 as ErrorEnum;
+impl From<ErrorEnum> for Error {
+    fn from(v: ErrorEnum) -> Error {
         match v {
             ffi::VPX_CODEC_MEM_ERROR => Error::Mem,
             ffi::VPX_CODEC_ABI_MISMATCH => Error::AbiMismatch,
@@ -33,7 +35,7 @@ impl From<u32> for Error {
             ffi::VPX_CODEC_CORRUPT_FRAME => Error::CorruptFrame,
             ffi::VPX_CODEC_INVALID_PARAM => Error::InvalidParam,
             ffi::VPX_CODEC_LIST_END => Error::ListEnd,
-            n => Error::Generic(n),
+            n => Error::Generic(n as u32),
         }
     }
 }
@@ -92,8 +94,8 @@ pub enum Format {
 impl Into<ffi::vpx_img_fmt_t> for Format {
     fn into(self) -> ffi::vpx_img_fmt_t {
         use Format::*;
-        use ffi::*;
 
+        use ffi::vpx_img_fmt::*;
         match self {
             RGB24 => VPX_IMG_FMT_RGB24,
             RGB32 { le: false, } => VPX_IMG_FMT_RGB32,
@@ -143,13 +145,14 @@ pub enum ColorSpace {
 }
 impl Into<ffi::vpx_color_space_t> for ColorSpace {
     fn into(self) -> ffi::vpx_color_space_t {
+        use ffi::vpx_color_space::*;
         match self {
-            ColorSpace::BT601 => ffi::VPX_CS_BT_601,
-            ColorSpace::BT709 => ffi::VPX_CS_BT_709,
-            ColorSpace::SMPTE170 => ffi::VPX_CS_SMPTE_170,
-            ColorSpace::SMPTE240 => ffi::VPX_CS_SMPTE_240,
-            ColorSpace::BT2020 => ffi::VPX_CS_BT_2020,
-            ColorSpace::SRGB => ffi::VPX_CS_SRGB,
+            ColorSpace::BT601 => VPX_CS_BT_601,
+            ColorSpace::BT709 => VPX_CS_BT_709,
+            ColorSpace::SMPTE170 => VPX_CS_SMPTE_170,
+            ColorSpace::SMPTE240 => VPX_CS_SMPTE_240,
+            ColorSpace::BT2020 => VPX_CS_BT_2020,
+            ColorSpace::SRGB => VPX_CS_SRGB,
         }
     }
 }
@@ -228,8 +231,8 @@ impl<'a> Frame<'a> {
         self.flags & FRAME_IS_FRAGMENT != 0
     }
 }
-impl<'a> From<&'a ffi::Struct_Unnamed6> for Frame<'a> {
-    fn from(v: &'a ffi::Struct_Unnamed6) -> Frame<'a> {
+impl<'a> From<&'a ffi::vpx_codec_cx_pkt__bindgen_ty_1__bindgen_ty_1> for Frame<'a> {
+    fn from(v: &'a ffi::vpx_codec_cx_pkt__bindgen_ty_1__bindgen_ty_1) -> Frame<'a> {
         let data: &'a [u8] = unsafe {
             ::std::slice::from_raw_parts(v.buf as *const u8, v.sz as usize)
         };
@@ -243,6 +246,10 @@ impl<'a> From<&'a ffi::Struct_Unnamed6> for Frame<'a> {
         }
     }
 }
+
+pub use ffi::vpx_rc_mode::*;
+pub use ffi::vpx_bit_depth::*;
+pub use ffi::vpx_rational;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
 pub enum Kind {

@@ -1,18 +1,17 @@
 [package]
-name = "libvpx-sys"
-version = "1.4.2"
-authors = ["Richard Diamond <wichard@vitalitystudios.com>"]
-license = "MPL-2.0"
-repository = "https://github.com/DiamondLovesYou/rust-vpx"
-description = "Rust bindings to libvpx"
+authors = ["Richard Diamond <wichard@vitalitystudios.com>", "Kornel Lesiński <kornel@geekhood.net>"]
 build = "build.rs"
+description = "Rust bindings to libvpx"
+license = "MPL-2.0"
+name = "libvpx-native-sys"
+repository = "https://github.com/DiamondLovesYou/rust-vpx"
+version = "2.0.0"
 
 [build-dependencies]
-pnacl-build-helper = "1.4"
 pkg-config = "0.3.5"
 
 [dependencies]
-libc = "*"
+libc = "0.2.20"
 
 [lib]
 name = "vpx_sys"
