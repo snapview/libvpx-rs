@@ -1,4 +1,3 @@
-#include "builtin_defines.h"
 
 #include <vpx/vp8.h>
 #include <vpx/vp8cx.h>
