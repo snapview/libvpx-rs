@@ -16,7 +16,7 @@ pub enum AQ_MODE {
   LOOKAHEAD_AQ = 5,
 }
 
-impl Default for vpx_codec_ctx__bindgen_ty_1_vpx_codec_enc_cfg {
+impl Default for vpx_codec_enc_cfg {
     fn default() -> Self {
         unsafe {::std::mem::zeroed()}
     }
