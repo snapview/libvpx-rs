@@ -16,6 +16,9 @@ pub enum AQ_MODE {
   LOOKAHEAD_AQ = 5,
 }
 
+// Back compat
+pub use vpx_codec_err_t::*;
+
 impl Default for vpx_codec_enc_cfg {
     fn default() -> Self {
         unsafe {::std::mem::zeroed()}

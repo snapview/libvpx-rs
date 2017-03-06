@@ -23,7 +23,8 @@ pub enum Error {
     InvalidParam,
     ListEnd,
 }
-use ffi::_bindgen_ty_3 as ErrorEnum;
+
+use ffi::vpx_codec_err_t as ErrorEnum;
 impl From<ErrorEnum> for Error {
     fn from(v: ErrorEnum) -> Error {
         match v {
@@ -249,6 +250,7 @@ impl<'a> From<&'a ffi::vpx_codec_cx_pkt__bindgen_ty_1__bindgen_ty_1> for Frame<'
 
 pub use ffi::vpx_rc_mode::*;
 pub use ffi::vpx_bit_depth::*;
+pub use ffi::vpx_codec_err_t::*;
 pub use ffi::vpx_rational;
 
 #[derive(Copy, Clone, Eq, PartialEq, Debug)]
