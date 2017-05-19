@@ -1,0 +1,3 @@
+# libvpx-rust
+
+Started as a complete rewriting of the `vpx` crate for Rust. Work in progress...

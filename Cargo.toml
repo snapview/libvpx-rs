@@ -1,18 +1,22 @@
 [package]
-authors = ["Richard Diamond <wichard@vitalitystudios.com>"]
-description = "Rust idiomatic wrapper to libvpx"
+authors = [
+    "Alexey Galakhov <agalakhov@snapview.de>",
+    "Daniel Abramov <dabramov@snapview.de>",
+    "Kornel Lesiński <kornel@geekhood.net>",
+    "Richard Diamond <wichard@vitalitystudios.com>",
+]
+description = "Rust wrapper to libvpx"
 keywords = ["vp9", "vp8", "webm", "video-encoder", "video-decoder"]
-license = "MPL-2.0"
-name = "vpx"
-repository = "https://github.com/DiamondLovesYou/rust-vpx"
+name = "libvpx_rust"
+repository = "https://github.com/snapview/libvpx-rs"
 version = "0.3.0"
 
 [dependencies]
-libc = "0.2.20"
+libc = "*"
 
 [dependencies.libvpx-native-sys]
 path = "src/sys"
 
 [lib]
-name = "vpx"
+name = "libvpx_rust"
 path = "src/lib/lib.rs"
