@@ -1,7 +1,7 @@
 use std;
 use ffi;
 
-type VPXResult<T> = Result<T, CodecError>;
+pub type VPXResult<T> = Result<T, CodecError>;
 
 #[derive(Clone, Copy, Eq, PartialEq, Debug)]
 /// Corresponds to the `vpx_codec_err_t` enum in C libvpx library.

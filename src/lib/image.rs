@@ -1,9 +1,10 @@
 use std::borrow::Cow;
+use std::ops::{Deref, DerefMut};
 
 use ffi;
 
 pub struct Image<'data> {
-    ffi_image: ffi::vpx_image_t,
+    inner: ffi::vpx_image_t,
     format: Format,
     data: Cow<'data, [u8]>,
 }
@@ -24,7 +25,7 @@ impl<'data> Image<'data> {
         img.cs = color_space.into();
 
         Image {
-            ffi_image: img,
+            inner: img,
             format: fmt,
             data: data,
         }
@@ -33,16 +34,25 @@ impl<'data> Image<'data> {
     pub fn get_format(&self) -> &Format {
         &self.format
     }
-
-    pub fn vpx_image(&self) -> &ffi::vpx_image_t {
-        // TODO: probably it's better to use Borrow<vpx_image_t> or AsRef<...>
-        &self.ffi_image
-    }
 }
 
 impl<'data> Drop for Image<'data> {
     fn drop(&mut self) {
-        unsafe { ffi::vpx_img_free(&mut self.ffi_image) }
+        unsafe { ffi::vpx_img_free(&mut self.inner) }
+    }
+}
+
+impl<'data> Deref for Image<'data> {
+    type Target = ffi::vpx_image_t;
+
+    fn deref(&self) -> &ffi::vpx_image_t {
+        &self.inner
+    }
+}
+
+impl<'data> DerefMut for Image<'data> {
+    fn deref_mut(&mut self) -> &mut ffi::vpx_image_t {
+        &mut self.inner
     }
 }
 

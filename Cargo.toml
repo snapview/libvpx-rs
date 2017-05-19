@@ -13,6 +13,7 @@ version = "0.3.0"
 
 [dependencies]
 libc = "*"
+time = "*"
 
 [dependencies.libvpx-native-sys]
 path = "src/sys"
