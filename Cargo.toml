@@ -9,7 +9,7 @@ description = "Rust wrapper to libvpx"
 keywords = ["vp9", "vp8", "webm", "video-encoder", "video-decoder"]
 name = "libvpx_rust"
 repository = "https://github.com/snapview/libvpx-rs"
-version = "0.3.0"
+version = "0.1.0"
 
 [dependencies]
 libc = "*"
