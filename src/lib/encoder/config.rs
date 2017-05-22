@@ -7,7 +7,7 @@ use error::{VPXResult as Result, check_err};
 
 pub struct EncoderConfig<Encoder> {
     inner: ffi::vpx_codec_enc_cfg_t,
-    _phantomData: PhantomData<Encoder>,
+    _phantom: PhantomData<Encoder>,
 }
 
 impl<Encoder: VpxEncoder> EncoderConfig<Encoder> {
@@ -16,7 +16,7 @@ impl<Encoder: VpxEncoder> EncoderConfig<Encoder> {
         check_err(unsafe { ffi::vpx_codec_enc_config_default(Encoder::interface(), &mut cfg, 0) })?;
         Ok(EncoderConfig {
             inner: cfg,
-            _phantomData: PhantomData { }
+            _phantom: PhantomData { }
         })
     }
 
@@ -41,6 +41,7 @@ impl<Encoder> Into<ffi::vpx_codec_enc_cfg_t> for EncoderConfig<Encoder> {
     }
 }
 
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq)]
 pub struct CodecFlags {
     use_psnr: bool,
     use_output_partition: bool,
@@ -76,14 +77,5 @@ impl Into<ffi::vpx_codec_flags_t> for CodecFlags {
             flags |= ffi::VPX_CODEC_USE_FRAME_THREADING as i64;
         }
         flags
-    }
-}
-
-
-impl Default for CodecFlags {
-    fn default() -> Self {
-        CodecFlags {
-            ..Default::default()
-        }
     }
 }

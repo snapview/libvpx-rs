@@ -1,5 +1,5 @@
 use std::marker::PhantomData;
-use std::ops::{Deref, DerefMut};
+use std::ops::Deref;
 use std::ptr::null;
 
 use ffi;
@@ -9,11 +9,14 @@ use time::Duration;
 use context::CodecContext as Context;
 use error::{VPXResult as Result, check_err};
 use image::Image;
-use self::config::{CodecFlags, EncoderConfig};
-use self::frame::FramesIter;
+
+pub use self::frame::{Frame, FramesIter};
+pub use self::config::{CodecFlags, EncoderConfig};
 
 mod config;
 mod frame;
+pub mod vp8;
+pub mod vp9;
 
 pub trait VpxEncoder {
     // type Config: Deref<Target=ffi::vpx_codec_enc_cfg_t>;
@@ -30,8 +33,8 @@ pub struct Encoder<Enc: VpxEncoder> {
 impl<Enc: VpxEncoder> Encoder<Enc> {
     pub fn new(config: Option<EncoderConfig<Enc>>, flags: Option<CodecFlags>) -> Result<Self> {
         let iface = Enc::interface();
-        let mut config = config.unwrap_or(EncoderConfig::<Enc>::new()?);
-        let mut flags = flags.unwrap_or(CodecFlags::default());
+        let config = config.unwrap_or(EncoderConfig::<Enc>::new()?);
+        let flags = flags.unwrap_or(CodecFlags::default());
         let mut ctx = Context::new();
         check_err(unsafe { ffi::vpx_codec_enc_init_ver(&mut *ctx,
                                                        iface,

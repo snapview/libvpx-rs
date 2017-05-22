@@ -3,6 +3,6 @@ extern crate time;
 extern crate vpx_sys as ffi;
 
 mod context;
-mod encoder;
+pub mod encoder;
+pub mod image;
 mod error;
-mod image;
