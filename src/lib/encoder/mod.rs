@@ -1,13 +1,17 @@
 use std::marker::PhantomData;
 use std::ops::{Deref, DerefMut};
+use std::ptr::null;
 
 use ffi;
-use time::Duration;
 use libc;
+use time::Duration;
 
 use context::CodecContext as Context;
 use error::{VPXResult as Result, check_err};
 use image::Image;
+use self::frame::FramesIter;
+
+mod frame;
 
 pub trait VpxEncoder {
     type Config: Deref<Target=ffi::vpx_codec_enc_cfg_t>;
@@ -20,7 +24,7 @@ pub trait VpxEncoder {
     fn create_default_frame_flags() -> Result<Self::FrameFlags>;
 }
 
-pub struct Encoder<Enc> {
+pub struct Encoder<Enc: VpxEncoder> {
     context: Context,
     _phantom: PhantomData<Enc>,
 }
@@ -56,6 +60,22 @@ impl<Enc: VpxEncoder> Encoder<Enc> {
                                                  *flags,
                                                  deadline.into()) })?;
         Ok(())
+    }
+
+    pub fn frames_iter(&mut self) -> FramesIter {
+        FramesIter::new(&mut self.context)
+    }
+}
+
+impl<Enc: VpxEncoder> Drop for Encoder<Enc> {
+    fn drop(&mut self) {
+        let res = unsafe {
+            ffi::vpx_codec_encode(&mut *self.context, null(), -1, 1, 0, Deadline::GoodQuality.into())
+        };
+        check_err(res).expect("Could not release the encoder resource");
+        let frames_iter = self.frames_iter();
+        for _ in frames_iter {
+        }
     }
 }
 
