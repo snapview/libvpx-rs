@@ -9,19 +9,17 @@ use time::Duration;
 use context::CodecContext as Context;
 use error::{VPXResult as Result, check_err};
 use image::Image;
+use self::config::{CodecFlags, EncoderConfig};
 use self::frame::FramesIter;
 
+mod config;
 mod frame;
 
 pub trait VpxEncoder {
-    type Config: Deref<Target=ffi::vpx_codec_enc_cfg_t>;
-    type CodecFlags: Deref<Target=ffi::vpx_codec_flags_t>;
-    type FrameFlags: Deref<Target=ffi::vpx_enc_frame_flags_t>;
-
-    fn create_interface() -> *mut ffi::vpx_codec_iface_t;
-    fn create_default_config() -> Result<Self::Config>;
-    fn create_default_codec_flags() -> Result<Self::CodecFlags>;
-    fn create_default_frame_flags() -> Result<Self::FrameFlags>;
+    // type Config: Deref<Target=ffi::vpx_codec_enc_cfg_t>;
+    // type CodecFlags: Deref<Target=ffi::vpx_codec_flags_t>;
+    type FrameFlags: Into<ffi::vpx_enc_frame_flags_t> + Default;
+    fn interface() -> *mut ffi::vpx_codec_iface_t;
 }
 
 pub struct Encoder<Enc: VpxEncoder> {
@@ -30,14 +28,15 @@ pub struct Encoder<Enc: VpxEncoder> {
 }
 
 impl<Enc: VpxEncoder> Encoder<Enc> {
-    pub fn new(config: Option<Enc::Config>, flags: Option<Enc::CodecFlags>) -> Result<Self> {
-        let mut config = config.unwrap_or(Enc::create_default_config()?);
-        let mut flags = flags.unwrap_or(Enc::create_default_codec_flags()?);
+    pub fn new(config: Option<EncoderConfig<Enc>>, flags: Option<CodecFlags>) -> Result<Self> {
+        let iface = Enc::interface();
+        let mut config = config.unwrap_or(EncoderConfig::<Enc>::new()?);
+        let mut flags = flags.unwrap_or(CodecFlags::default());
         let mut ctx = Context::new();
         check_err(unsafe { ffi::vpx_codec_enc_init_ver(&mut *ctx,
-                                                       Enc::create_interface(),
-                                                       &*config,
-                                                       *flags,
+                                                       iface,
+                                                       &config.into(),
+                                                       flags.into(),
                                                        ffi::VPX_ENCODER_ABI_VERSION as i32) })?;
         Ok(Encoder {
             context: ctx,
@@ -57,7 +56,7 @@ impl<Enc: VpxEncoder> Encoder<Enc> {
                                                  image.deref(),
                                                  pts,
                                                  duration,
-                                                 *flags,
+                                                 flags.into(),
                                                  deadline.into()) })?;
         Ok(())
     }
