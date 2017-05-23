@@ -1,3 +1,5 @@
+//! Contains the structures which wrap libvpx main encoder configuration.
+
 use std::marker::PhantomData;
 
 use ffi;
@@ -5,6 +7,7 @@ use ffi;
 use encoder::VpxEncoder;
 use error::{VPXResult as Result, check_err};
 
+/// An encoder configuration for a specific codec `Encoder`.
 pub struct EncoderConfig<Encoder> {
     inner: ffi::vpx_codec_enc_cfg_t,
     _phantom: PhantomData<Encoder>,
@@ -25,6 +28,13 @@ impl<Encoder: VpxEncoder> EncoderConfig<Encoder> {
         self.inner.g_h = height;
     }
 
+    /// Set the timebase.
+    ///
+    /// > **EXAMPLE**: if you want to write a simple encoder which encodes frames
+    /// > and writes them to the file and the FPS is 30, the `numerator` could be `1` and the
+    /// > denominator should be `30` in this case. The `pts` (presentation timestamp) during the
+    /// > encoding process should be in timebase units (so each frame would have a monotonic pts
+    /// > equal to the frame number in case of our example).
     pub fn set_timebase(&mut self, numerator: u32, denominator: u32) {
         self.inner.g_timebase.num = numerator as i32;
         self.inner.g_timebase.den = denominator as i32;

@@ -16,6 +16,7 @@ impl VpxEncoder for VP8 {
 pub struct FrameFlags {
     force_kf: bool,
 
+    // VP8 specific flags.
     no_ref_last: bool,
     no_ref_gf: bool,
     no_ref_arf: bool,

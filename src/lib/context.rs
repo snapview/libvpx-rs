@@ -1,3 +1,6 @@
+//! Contains the representation of the encoder/decoder context (instance). It is used to identify
+//! the particular instance of encoder/decoder used by the developer.
+
 use std::ops::{Deref, DerefMut};
 use ffi;
 

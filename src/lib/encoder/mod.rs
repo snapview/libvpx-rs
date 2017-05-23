@@ -1,3 +1,5 @@
+//! Common video encoder functions for VP8/VP9 codecs.
+
 use std::marker::PhantomData;
 use std::ops::Deref;
 use std::ptr::null;
@@ -18,19 +20,31 @@ mod frame;
 pub mod vp8;
 pub mod vp9;
 
+/// This trait has to be implemented by every codec which can be used by libvpx library.
 pub trait VpxEncoder {
+    // These types are commented here, but theoretically VP8/VP9 configs are also different, so it
+    // could be that we might uncomment them / write them again when we need it in future.
     // type Config: Deref<Target=ffi::vpx_codec_enc_cfg_t>;
     // type CodecFlags: Deref<Target=ffi::vpx_codec_flags_t>;
+
+    /// Codec specific frame flags. The set of encoding flags differs between VP8 and VP9.
     type FrameFlags: Into<ffi::vpx_enc_frame_flags_t> + Default;
+
+    /// Returns a reference to the codec interface (some sort of opaque data structure inside
+    /// libvpx.
     fn interface() -> *mut ffi::vpx_codec_iface_t;
 }
 
+/// An instance of libvpx-based encoder, you have to specify which codec you want to use, current
+/// the supported encoders are: `Encoder<VP8>`, `Encoder<VP9>`.
 pub struct Encoder<Enc: VpxEncoder> {
     context: Context,
     _phantom: PhantomData<Enc>,
 }
 
 impl<Enc: VpxEncoder> Encoder<Enc> {
+    /// Creates a new encoder given the configurations given by the user. In case if the
+    /// configurations are not explicitly specified, the default configuration will be used.
     pub fn new(config: Option<EncoderConfig<Enc>>, flags: Option<CodecFlags>) -> Result<Self> {
         let iface = Enc::interface();
         let config = config.unwrap_or(EncoderConfig::<Enc>::new()?);
@@ -47,6 +61,8 @@ impl<Enc: VpxEncoder> Encoder<Enc> {
         })
     }
 
+    /// Encodes a single frame, fails in case if the encoding cannot be done. Refer to
+    /// `vpx_codec_encode()` to get more info about each parameter.
     pub fn encode(&mut self,
                   image: &Image,
                   pts: ffi::vpx_codec_pts_t,
@@ -64,6 +80,9 @@ impl<Enc: VpxEncoder> Encoder<Enc> {
         Ok(())
     }
 
+    /// Returns a frame iterator which can be used to iterate over encoded frames so far. You can
+    /// call this function directly after `encode()`, but you are not obliged to. You cannot call
+    /// any encoding functions while you own a frame iterator.
     pub fn frames_iter(&mut self) -> FramesIter {
         FramesIter::new(&mut self.context)
     }
@@ -71,6 +90,10 @@ impl<Enc: VpxEncoder> Encoder<Enc> {
 
 impl<Enc: VpxEncoder> Drop for Encoder<Enc> {
     fn drop(&mut self) {
+        // According to libvpx documentation we have to flush the encoder data to ensure that the
+        // encoding is stopped and the encoder is done. To do that we have to push a null frame
+        // (the parameters has been taken from libvpx examples) and then get the frame iterator and
+        // iterate till the end of the stream.
         let res = unsafe {
             ffi::vpx_codec_encode(&mut *self.context, null(), -1, 1, 0, Deadline::GoodQuality.into())
         };
@@ -81,6 +104,7 @@ impl<Enc: VpxEncoder> Drop for Encoder<Enc> {
     }
 }
 
+/// Soft realtime deadline parameters for libvpx encoder.
 pub enum Deadline {
     Realtime,
     GoodQuality,

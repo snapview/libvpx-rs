@@ -1,3 +1,5 @@
+//! General representation of the error in libvpx.
+
 use std;
 use ffi;
 

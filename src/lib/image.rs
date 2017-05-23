@@ -1,3 +1,5 @@
+//! Wraps libvpx image representation which can be used to be passed in the video encoder.
+
 use std::borrow::Cow;
 use std::ops::{Deref, DerefMut};
 
